@@ -1,0 +1,4 @@
+mov R2,-5
+mov R1,3
+sub  R1,R2
+sub  R2,R3
