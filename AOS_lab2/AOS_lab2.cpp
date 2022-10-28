@@ -66,8 +66,6 @@ word toNor(word x) {
 word operator+(word a, word b) {
 	word res;
 	int sgn = a[max_bits - 1] != b[max_bits - 1];
-	a = toAdd(a);
-	b = toAdd(b);
 	int carry = 0;
 	for (int i = 0; i < max_bits; i++) {
 		int z = (int)a[i] + (int)b[i] + carry;
@@ -77,11 +75,13 @@ word operator+(word a, word b) {
 		}
 		res[i] = z;
 	}
-	return toNor(res);
+	return (res);
 
 }
 word operator-(word a, word b) {
+	b = toNor(b);
 	b[max_bits - 1].flip();
+	b = toAdd(b);
 	return a + b;
 }
 
@@ -99,8 +99,8 @@ vector<string> splitter(string s) {
 	if (x != "")ans.push_back(x);
 	return ans;
 }
-bool isDigit(string line)
-{
+bool isDigit(string line){
+	if (line.size() > 9) return false;
 	char* p;
 	strtol(line.c_str(), &p, 10);
 	return *p == 0;
@@ -122,20 +122,18 @@ struct processor {
 	int commands = 0;
 	int status = 0;
 	void mov_val(int op1, int value) {
-		regs[op1] = toWord(value);
+		regs[op1] = toAdd(toWord(value));
 	}
 	void mov_reg(int op1, int op2) {
 		regs[op1] = regs[op2];
 	}
 	void sub_val(int op1, int value) {
 		auto w = toWord(value);
-		w[max_bits - 1].flip();
-		regs[op1] = regs[op1] + w;
+		regs[op1] = regs[op1] - w;
 	}
 	void sub_reg(int op1, int op2) {
 		auto w = regs[op2];
-		w[max_bits - 1].flip();
-		regs[op1] = regs[op1] + w;
+		regs[op1] = regs[op1] - w;
 	}
 	void proccess_command(vector<string> operands) {
 		last_command = operands[0] + " " + operands[1] + "," + operands[2];
@@ -163,7 +161,7 @@ struct processor {
 	void print_info() {
 		cout << "IR: " << last_command << '\n';
 		for (int i = 0; i < max_regs; i++) 
-			cout <<"R" << char('1' + i) << " " << regs[i].to_string() << ' ' << toInt(regs[i]) << '\n';
+			cout <<"R" << char('1' + i) << " " << regs[i].to_string() << ' ' << toInt(toNor(regs[i])) << '\n';
 
 		cout << "PS: " << status << '\n';
 		cout << "PC: " << commands << '\n';
